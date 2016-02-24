@@ -20,8 +20,6 @@ static const char* MENU_ITEMS[] = {
     "Reboot system now",
     "Reboot to bootloader",
     "Apply update from ADB",
-    "Wipe data/factory reset",
-    "Wipe cache partition",
     "Mount /system",
     "View recovery logs",
     "Run graphics test",
@@ -38,12 +36,10 @@ Device::BuiltinAction Device::InvokeMenuItem(int menu_position) {
     case 0: return REBOOT;
     case 1: return REBOOT_BOOTLOADER;
     case 2: return APPLY_ADB_SIDELOAD;
-    case 3: return WIPE_DATA;
-    case 4: return WIPE_CACHE;
-    case 5: return MOUNT_SYSTEM;
-    case 6: return VIEW_RECOVERY_LOGS;
-    case 7: return RUN_GRAPHICS_TEST;
-    case 8: return SHUTDOWN;
+    case 3: return MOUNT_SYSTEM;
+    case 4: return VIEW_RECOVERY_LOGS;
+    case 5: return RUN_GRAPHICS_TEST;
+    case 6: return SHUTDOWN;
     default: return NO_ACTION;
   }
 }
