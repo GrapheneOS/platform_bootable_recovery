@@ -415,6 +415,11 @@ static int write_block(MtdWriteContext *ctx, const char *data)
     }
 
     ssize_t size = partition->erase_size;
+    char *verify = malloc(size);
+    if (!verify) {
+        printf("mtd: malloc: %s\n", strerror(errno));
+        return -1;
+    }
     while (pos + size <= (int) partition->size) {
         loff_t bpos = pos;
         int ret = ioctl(fd, MEMGETBADBLOCK, &bpos);
@@ -443,7 +448,6 @@ static int write_block(MtdWriteContext *ctx, const char *data)
                         pos, strerror(errno));
             }
 
-            char verify[size];
             if (TEMP_FAILURE_RETRY(lseek(fd, pos, SEEK_SET)) != pos ||
                 TEMP_FAILURE_RETRY(read(fd, verify, size)) != size) {
                 printf("mtd: re-read error at 0x%08lx (%s)\n",
