@@ -20,9 +20,11 @@ static const char* MENU_ITEMS[] = {
     "Reboot system now",
     "Reboot to bootloader",
     "Apply update from ADB",
+#ifndef DISABLE_FEATURES
     "Apply update from SD card",
     "Wipe data/factory reset",
     "Wipe cache partition",
+#endif
     "Mount /system",
     "View recovery logs",
     "Run graphics test",
@@ -39,6 +41,12 @@ Device::BuiltinAction Device::InvokeMenuItem(int menu_position) {
     case 0: return REBOOT;
     case 1: return REBOOT_BOOTLOADER;
     case 2: return APPLY_ADB_SIDELOAD;
+#ifdef DISABLE_FEATURES
+    case 3: return MOUNT_SYSTEM;
+    case 4: return VIEW_RECOVERY_LOGS;
+    case 5: return RUN_GRAPHICS_TEST;
+    case 6: return SHUTDOWN;
+#else
     case 3: return APPLY_SDCARD;
     case 4: return WIPE_DATA;
     case 5: return WIPE_CACHE;
@@ -46,6 +54,7 @@ Device::BuiltinAction Device::InvokeMenuItem(int menu_position) {
     case 7: return VIEW_RECOVERY_LOGS;
     case 8: return RUN_GRAPHICS_TEST;
     case 9: return SHUTDOWN;
+#endif
     default: return NO_ACTION;
   }
 }

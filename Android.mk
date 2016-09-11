@@ -28,6 +28,11 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
+# Disable useless features on user builds
+ifeq ($(TARGET_BUILD_VARIANT),user)
+    LOCAL_CFLAGS += -DDISABLE_FEATURES
+endif
+
 LOCAL_SRC_FILES := \
     adb_install.cpp \
     asn1_decoder.cpp \
