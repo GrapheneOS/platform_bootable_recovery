@@ -42,7 +42,6 @@ void FillDefaultFastbootLines(std::vector<std::string>& title_lines) {
   title_lines.push_back("Bootloader version - " + android::base::GetProperty("ro.bootloader", ""));
   title_lines.push_back("Baseband version - " +
                         android::base::GetProperty("ro.build.expect.baseband", ""));
-  title_lines.push_back("Serial number - " + android::base::GetProperty("ro.serialno", ""));
   title_lines.push_back(std::string("Secure boot - ") +
                         ((android::base::GetProperty("ro.secure", "") == "1") ? "yes" : "no"));
   title_lines.push_back("HW version - " + android::base::GetProperty("ro.revision", ""));
