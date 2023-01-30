@@ -319,9 +319,8 @@ static void WriteUpdateInProgress() {
 
 static bool AskToReboot(Device* device, Device::BuiltinAction chosen_action) {
   bool is_non_ab = android::base::GetProperty("ro.boot.slot_suffix", "").empty();
-  bool is_virtual_ab = android::base::GetBoolProperty("ro.virtual_ab.enabled", false);
-  if (!is_non_ab && !is_virtual_ab) {
-    // Only prompt for non-A/B or Virtual A/B devices.
+  if (!is_non_ab) {
+    // Only prompt for non-A/B devices.
     return true;
   }
 
