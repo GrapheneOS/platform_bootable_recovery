@@ -84,7 +84,7 @@ bool WipeData(Device* device) {
   ui->SetBackground(RecoveryUI::ERASING);
   ui->SetProgressType(RecoveryUI::INDETERMINATE);
 
-  if (!FinishPendingSnapshotMerges(device)) {
+  if (!FinishPendingSnapshotMerges(device, /* called_from_wipe */ true)) {
     ui->Print("Unable to check update status or complete merge, cannot wipe partitions.\n");
     return false;
   }

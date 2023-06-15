@@ -26,7 +26,7 @@
 using android::snapshot::CreateResult;
 using android::snapshot::SnapshotManager;
 
-bool FinishPendingSnapshotMerges(Device* device) {
+bool FinishPendingSnapshotMerges(Device* device, bool called_from_wipe) {
   if (!android::base::GetBoolProperty("ro.virtual_ab.enabled", false)) {
     return true;
   }
@@ -38,6 +38,45 @@ bool FinishPendingSnapshotMerges(Device* device) {
     return false;
   }
 
+  if (!called_from_wipe) {
+    using namespace android::snapshot;
+
+    double progress;
+    UpdateState update_state = sm->GetUpdateState(&progress);
+
+    ui->Print("State of pending update: ");
+
+    switch (update_state) {
+      case UpdateState::None:
+        ui->Print("Pending update not found\n");
+        // HandleImminentDataWipe() is not a no-op even in this case, do not return
+        break;
+      case UpdateState::Initiated:
+        ui->Print("Initiated\n");
+        break;
+      case UpdateState::Unverified:
+        ui->Print("Unverified\n");
+        break;
+      case UpdateState::Merging:
+        ui->Print("Merging, progress: %.2ff\n", progress);
+        break;
+      case UpdateState::MergeNeedsReboot:
+        ui->Print("MergeNeedsReboot\n");
+        break;
+      case UpdateState::MergeCompleted:
+        ui->Print("MergeCompleted\n");
+        break;
+      case UpdateState::MergeFailed:
+        ui->Print("MergeFailed\n");
+        break;
+      case UpdateState::Cancelled:
+        ui->Print("Cancelled\n");
+        break;
+      default:
+        ui->Print("unknown (%i)\n", (int) update_state);
+    }
+  }
+
   auto callback = [&]() -> void {
     double progress;
     sm->GetUpdateState(&progress);
@@ -46,6 +85,9 @@ bool FinishPendingSnapshotMerges(Device* device) {
   if (!sm->HandleImminentDataWipe(callback)) {
     ui->Print("Unable to check merge status and/or complete update merge.\n");
     return false;
+  }
+  if (!called_from_wipe) {
+    ui->Print("Operation completed successfully\n");
   }
   return true;
 }

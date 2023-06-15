@@ -431,6 +431,11 @@ static Device::BuiltinAction PromptAndWait(Device* device, InstallResult status)
         }
         break;
 
+      case Device::DISCARD_PENDING_UPDATE: {
+        FinishPendingSnapshotMerges(device, /* called_from_wipe */ false);
+        break;
+      }
+
       case Device::WIPE_DATA:
         save_current_log = true;
         if (ui->IsTextVisible()) {
