@@ -28,6 +28,7 @@
 
 static std::vector<std::pair<std::string, Device::BuiltinAction>> g_menu_actions{
   { "Reboot system now", Device::REBOOT },
+  { "Discard pending OS update", Device::DISCARD_PENDING_UPDATE },
   { "Reboot to bootloader", Device::REBOOT_BOOTLOADER },
   { "Enter fastboot", Device::ENTER_FASTBOOT },
   { "Apply update from ADB", Device::APPLY_ADB_SIDELOAD },

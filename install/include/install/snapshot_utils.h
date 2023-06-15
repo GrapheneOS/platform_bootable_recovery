@@ -18,7 +18,7 @@
 
 #include "recovery_ui/device.h"
 
-bool FinishPendingSnapshotMerges(Device* device);
+bool FinishPendingSnapshotMerges(Device* device, bool called_from_wipe);
 
 /*
  * This function tries to create the snapshotted devices in the case a Virtual
