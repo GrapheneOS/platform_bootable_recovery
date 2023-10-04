@@ -71,7 +71,6 @@ static constexpr int VERIFICATION_PROGRESS_TIME = 60;
 static constexpr float VERIFICATION_PROGRESS_FRACTION = 0.25;
 // The charater used to separate dynamic fingerprints. e.x. sargo|aosp-sargo
 static const char* FINGERPRING_SEPARATOR = "|";
-static constexpr auto&& RELEASE_KEYS_TAG = "release-keys";
 // If brick packages are smaller than |MEMORY_PACKAGE_LIMIT|, read the entire package into memory
 static constexpr size_t MEMORY_PACKAGE_LIMIT = 1024 * 1024;
 
@@ -235,20 +234,8 @@ bool CheckPackageMetadata(const std::map<std::string, std::string>& metadata, Ot
     LOG(ERROR) << "Serial number constraint not permitted: " << pkg_serial_no;
     return INSTALL_ERROR;
   } else if (ota_type == OtaType::BRICK) {
-    const auto device_build_tag = android::base::GetProperty("ro.build.tags", "");
-    if (device_build_tag.empty()) {
-      LOG(ERROR) << "Unable to determine device build tags, serial number is missing from package. "
-                    "Rejecting the brick OTA package.";
-      return false;
-    }
-    if (device_build_tag == RELEASE_KEYS_TAG) {
-      LOG(ERROR) << "Device is release key build, serial number is missing from package. "
-                    "Rejecting the brick OTA package.";
-      return false;
-    }
-    LOG(INFO)
-        << "Serial number is missing from brick OTA package, permitting anyway because device is "
-        << device_build_tag;
+    LOG(ERROR) << "OtaType::BRICK is not permitted";
+    return INSTALL_ERROR;
   }
 
   if (ota_type == OtaType::AB) {
