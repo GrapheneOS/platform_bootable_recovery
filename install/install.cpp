@@ -224,20 +224,8 @@ bool CheckPackageMetadata(const std::map<std::string, std::string>& metadata, Ot
     LOG(ERROR) << "Serial number constraint not permitted: " << pkg_serial_no;
     return INSTALL_ERROR;
   } else if (ota_type == OtaType::BRICK) {
-    const auto device_build_tag = android::base::GetProperty("ro.build.tags", "");
-    if (device_build_tag.empty()) {
-      LOG(ERROR) << "Unable to determine device build tags, serial number is missing from package. "
-                    "Rejecting the brick OTA package.";
-      return false;
-    }
-    if (device_build_tag == RELEASE_KEYS_TAG) {
-      LOG(ERROR) << "Device is release key build, serial number is missing from package. "
-                    "Rejecting the brick OTA package.";
-      return false;
-    }
-    LOG(INFO)
-        << "Serial number is missing from brick OTA package, permitting anyway because device is "
-        << device_build_tag;
+    LOG(ERROR) << "OtaType::BRICK is not permitted";
+    return INSTALL_ERROR;
   }
 
   if (ota_type == OtaType::AB) {
