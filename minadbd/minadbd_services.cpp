@@ -233,7 +233,7 @@ static void RescueGetpropHostService(unique_fd sfd, const std::string& prop) {
       }
       result += "[" + key + "]: [" + value + "]\n";
     }
-  } else if (kGetpropAllowedProps.find(prop) != kGetpropAllowedProps.end()) {
+  } else if (kGetpropAllowedProps.contains(prop)) {
     result = query_prop(prop) + "\n";
   }
   if (result.empty()) {

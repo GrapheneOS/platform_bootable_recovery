@@ -167,7 +167,7 @@ static bool HandleMessageFromMinadbd(int socket_fd,
   if (command_type == MinadbdCommand::kError) {
     return false;
   }
-  if (command_map.find(command_type) == command_map.end()) {
+  if (!command_map.contains(command_type)) {
     LOG(ERROR) << "Unsupported command: "
                << android::base::get_unaligned<unsigned int>(
                       message.substr(strlen(kMinadbdCommandPrefix)).c_str());
