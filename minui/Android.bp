@@ -50,7 +50,6 @@ cc_library {
     shared_libs: [
         "libbase",
         "libpng",
-        "libz",
     ],
 
     target: {
