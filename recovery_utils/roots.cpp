@@ -37,6 +37,7 @@
 #include <ext4_utils/wipe.h>
 #include <fs_mgr.h>
 #include <fs_mgr/roots.h>
+#include <fstab/fstab.h>
 
 #include "otautil/sysutil.h"
 
@@ -130,11 +131,67 @@ static int64_t get_file_size(int fd, uint64_t reserve_len) {
   return computed_size;
 }
 
+static FstabEntry* LocateFormattableEntry(const std::vector<FstabEntry*>& entries) {
+  if (entries.empty()) {
+    return nullptr;
+  }
+  const auto& blk_device = entries.front()->blk_device;
+  FstabEntry* f2fs_entry = nullptr;
+  for (auto&& entry : entries) {
+    if (getpagesize() != 4096 && entry->fs_type == "f2fs") {
+      f2fs_entry = entry;
+      continue;
+    }
+    if (f2fs_entry) {
+      LOG(INFO) << "Skipping F2FS format for block device " << entry->blk_device << " @ "
+                << entry->mount_point
+                << " in non-4K mode for dev option enabled devices, "
+                   "as these devices need to toggle between 4K/16K mode, and F2FS does "
+                   "not support page_size != block_size configuration.";
+    }
+    return entry;
+  }
+  if (f2fs_entry) {
+    LOG(INFO) << "Using F2FS for " << f2fs_entry->blk_device << " @ " << f2fs_entry->mount_point
+              << " even though we are in non-4K mode. Device might require a data wipe after "
+                 "going back to 4K mode, as F2FS does not support page_size != block_size";
+  }
+  return f2fs_entry;
+}
+
+bool WipeBlockDevice(const char* path) {
+  android::base::unique_fd fd(open(path, O_RDWR));
+  if (fd == -1) {
+    PLOG(ERROR) << "WipeBlockDevice: failed to open " << path;
+    return false;
+  }
+  int64_t device_size = get_file_size(fd.get(), 0);
+  if (device_size < 0) {
+    PLOG(ERROR) << "WipeBlockDevice: failed to determine size of " << device_size;
+    return false;
+  }
+  if (device_size == 0) {
+    PLOG(ERROR) << "WipeBlockDevice: block device " << device_size << " has 0 length, skip wiping";
+    return false;
+  }
+  if (!wipe_block_device(fd.get(), device_size)) {
+    return true;
+  }
+  PLOG(ERROR) << "Failed to wipe " << path;
+  return false;
+}
+
 int format_volume(const std::string& volume, const std::string& directory,
                   std::string_view new_fstype) {
-  const FstabEntry* v = android::fs_mgr::GetEntryForPath(&fstab, volume);
-  if (v == nullptr) {
+  const auto entries = android::fs_mgr::GetEntriesForPath(&fstab, volume);
+  if (entries.empty()) {
     LOG(ERROR) << "unknown volume \"" << volume << "\"";
+    return -1;
+  }
+
+  const FstabEntry* v = LocateFormattableEntry(entries);
+  if (v == nullptr) {
+    LOG(ERROR) << "Unable to find formattable entry for \"" << volume << "\"";
     return -1;
   }
   if (v->fs_type == "ramdisk") {
@@ -273,13 +330,17 @@ int format_volume(const std::string& volume, const std::string& directory,
     make_f2fs_cmd.push_back("-O");
     make_f2fs_cmd.push_back("extra_attr");
   }
+  make_f2fs_cmd.push_back("-b");
+  make_f2fs_cmd.push_back(std::to_string(getpagesize()));
   make_f2fs_cmd.push_back(v->blk_device);
   if (length >= kSectorSize) {
     make_f2fs_cmd.push_back(std::to_string(length / kSectorSize));
   }
 
   if (exec_cmd(make_f2fs_cmd) != 0) {
-    PLOG(ERROR) << "format_volume: Failed to make_f2fs on " << v->blk_device;
+    PLOG(ERROR) << "format_volume: Failed to make_f2fs on " << v->blk_device
+                << " wiping the block device to avoid leaving partially formatted data.";
+    WipeBlockDevice(v->blk_device.c_str());
     return -1;
   }
   if (!directory.empty()) {
