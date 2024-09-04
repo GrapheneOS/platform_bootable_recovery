@@ -46,6 +46,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES := \
 
 LOCAL_SHARED_LIBRARIES := \
     libbase.recovery \
+    libboot_control_client.recovery \
     liblog.recovery \
     librecovery_ui.recovery
 
