@@ -135,7 +135,6 @@ static FstabEntry* LocateFormattableEntry(const std::vector<FstabEntry*>& entrie
   if (entries.empty()) {
     return nullptr;
   }
-  const auto& blk_device = entries.front()->blk_device;
   FstabEntry* f2fs_entry = nullptr;
   for (auto&& entry : entries) {
     if (getpagesize() != 4096 && entry->fs_type == "f2fs") {
