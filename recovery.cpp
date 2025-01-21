@@ -384,7 +384,8 @@ static Device::BuiltinAction PromptAndWait(Device* device, InstallResult status)
     ui->SetProgressType(RecoveryUI::EMPTY);
 
     std::vector<std::string> headers;
-    if (update_in_progress) {
+    bool is_non_ab = android::base::GetProperty("ro.boot.slot_suffix", "").empty();
+    if (is_non_ab && update_in_progress) {
       headers = { "WARNING: Previous installation has failed.",
                   "  Your device may fail to boot if you reboot or power off now." };
     }
