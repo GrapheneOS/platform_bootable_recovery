@@ -189,7 +189,6 @@ cc_binary {
     required: [
         "e2fsdroid.recovery",
         "init_recovery.rc",
-        "librecovery_ui_ext",
         "minadbd",
         "mke2fs.conf.recovery",
         "mke2fs.recovery",
@@ -282,32 +281,6 @@ phony {
     }) + select(soong_config_variable("recovery", "has_board_cacheimage_partition_size"), {
         false: ["recovery-refresh"],
         default: [],
-    }),
-}
-
-cc_library_shared {
-    name: "librecovery_ui_ext",
-    recovery: true,
-    install_in_root: true,
-    multilib: {
-        lib32: {
-            relative_install_path: "system/lib",
-        },
-        lib64: {
-            relative_install_path: "system/lib64",
-        },
-    },
-    shared_libs: [
-        "libbase",
-        "liblog",
-        "librecovery_ui",
-    ],
-    // TARGET_RECOVERY_UI_LIB should be one of librecovery_ui_{default,wear,vr,ethernet} or a
-    // device-specific module that defines make_device() and the exact RecoveryUI class for the
-    // target. It defaults to librecovery_ui_default, which uses ScreenRecoveryUI.
-    whole_static_libs: select(soong_config_variable("recovery", "target_recovery_ui_lib"), {
-        any @ libs: libs,
-        default: ["librecovery_ui_default"],
     }),
 }
 
