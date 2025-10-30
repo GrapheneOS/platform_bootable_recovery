@@ -194,6 +194,7 @@ cc_binary {
         "mke2fs.conf.recovery",
         "mke2fs.recovery",
         "recovery_deps",
+        "diagnostics_deps",
         "ueventd.rc.recovery",
     ],
 }
@@ -256,6 +257,17 @@ filegroup {
     srcs: [
         "res-*/images/*_text.png",
     ],
+}
+
+// diagnostics_deps: A phony target that's depended on by `recovery`,
+// which builds additional modules which provide diagnostics tools to
+// run from the recovery menu. Inspired by "recovery_deps"
+phony {
+    name: "diagnostics_deps",
+    recovery: true,
+    required: [
+        "keystore2.recovery",
+    ]
 }
 
 // recovery_deps: A phony target that's depended on by `recovery`, which
